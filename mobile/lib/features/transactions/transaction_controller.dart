@@ -28,6 +28,8 @@ class TransactionsController extends ChangeNotifier {
 
   bool get hasActiveFilters => _filters.isActive;
 
+  bool get loadedOnce => _loadedOnce;
+
   Future<void> load() async {
     _page = 1;
     _state = const UiState.loading();

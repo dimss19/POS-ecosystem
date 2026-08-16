@@ -25,6 +25,8 @@ class ReportsController extends ChangeNotifier {
   UiState<List<ProductReportRow>> get products => _products;
   UiState<List<CashierReportRow>> get cashiers => _cashiers;
 
+  bool get loadedOnce => _loadedOnce;
+
   void setRange(DateTime? from, DateTime? to) {
     _from = from;
     _to = to;

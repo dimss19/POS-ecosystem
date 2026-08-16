@@ -41,6 +41,30 @@ class TransactionFilters {
         if (search != null && search!.isNotEmpty) 'search': search,
       };
 
+  TransactionFilters copyWith({
+    DateTime? from,
+    DateTime? to,
+    String? cashier,
+    PaymentMethod? paymentMethod,
+    TransactionStatus? status,
+    String? search,
+    bool clearFrom = false,
+    bool clearTo = false,
+    bool clearCashier = false,
+    bool clearMethod = false,
+    bool clearStatus = false,
+    bool clearSearch = false,
+  }) {
+    return TransactionFilters(
+      from: clearFrom ? null : (from ?? this.from),
+      to: clearTo ? null : (to ?? this.to),
+      cashier: clearCashier ? null : (cashier ?? this.cashier),
+      paymentMethod: clearMethod ? null : (paymentMethod ?? this.paymentMethod),
+      status: clearStatus ? null : (status ?? this.status),
+      search: clearSearch ? null : (search ?? this.search),
+    );
+  }
+
   static String _date(DateTime? value) {
     final normalized = value ?? DateTime.now();
     return '${normalized.year.toString().padLeft(4, '0')}-'

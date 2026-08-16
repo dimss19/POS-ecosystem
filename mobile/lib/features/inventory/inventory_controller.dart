@@ -31,6 +31,14 @@ class InventoryController extends ChangeNotifier {
 
   bool get loadedOnce => _loadedOnce;
 
+  Product? productById(int? id) {
+    if (id == null) return null;
+    for (final product in _overview.data ?? const <Product>[]) {
+      if (product.id == id) return product;
+    }
+    return null;
+  }
+
   List<Product> get visibleStock {
     final all = _overview.data ?? const <Product>[];
     if (!_lowStockOnly) return all;
