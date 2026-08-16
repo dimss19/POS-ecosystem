@@ -29,6 +29,8 @@ class InventoryController extends ChangeNotifier {
   bool get adjusting => _adjusting;
   String? get adjustmentError => _adjustmentError;
 
+  bool get loadedOnce => _loadedOnce;
+
   List<Product> get visibleStock {
     final all = _overview.data ?? const <Product>[];
     if (!_lowStockOnly) return all;

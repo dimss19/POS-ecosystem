@@ -31,6 +31,10 @@ class ProductsController extends ChangeNotifier {
   bool get saving => _saving;
   String? get saveError => _saveError;
 
+  bool get loadedOnce => _loadedOnce;
+
+  List<Category> get categories => _categoriesState.data ?? const <Category>[];
+
   /// Products after search + category filters.
   List<Product> get visibleProducts {
     final all = _state.data ?? const <Product>[];
