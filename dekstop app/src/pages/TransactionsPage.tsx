@@ -16,7 +16,6 @@ export default function TransactionsPage() {
     selectedTransactionItems,
     selectedTransactionId,
     isLoading,
-    error,
     loadTransactions,
     loadTransactionItems,
     voidTransaction,

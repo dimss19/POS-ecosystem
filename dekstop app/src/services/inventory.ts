@@ -8,7 +8,7 @@
  * - Transactions are processed atomically.
  */
 
-import { execute, select, transaction } from './database';
+import { select, transaction } from './database';
 import { getDeviceId } from './transaction';
 import type { StockMovement } from '../types';
 
