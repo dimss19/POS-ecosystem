@@ -17,6 +17,8 @@ class DashboardController extends ChangeNotifier {
 
   UiState<DashboardData> get state => _state;
 
+  bool get hasLoaded => _loadedOnce;
+
   Future<void> load() async {
     _state = const UiState.loading();
     notifyListeners();

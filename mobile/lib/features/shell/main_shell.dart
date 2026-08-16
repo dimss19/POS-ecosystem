@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/theme/app_theme.dart';
 import '../auth/auth_controller.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../inventory/inventory_screen.dart';
@@ -28,14 +27,52 @@ class _MainShellState extends State<MainShell> {
     'Reports',
   ];
 
+  Future<void> _signOut(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Sign out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Sign out'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await context.read<AuthController>().logout();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final session = context.select<AuthController, AuthSessionInfo>(
-      (c) => AuthSessionInfo(c.session?.user.name ?? ''),
+    final userName = context.select<AuthController, String>(
+      (c) => c.session?.user.name ?? '',
     );
 
     return Scaffold(
-      body: IndexedStack(
+      appBar: AppBar(
+        title: Text(_titles[_index]),
+        actions: [
+          IconButton(
+            tooltip: 'Account',
+            icon: const Icon(Icons.account_circle_outlined),
+            onPressed: () => _showAccount(context, userName),
+          ),
+          IconButton(
+            tooltip: 'Sign out',
+            icon: const Icon(Icons.logout),
+            onPressed: () => _signOut(context),
+          ),
+        ],
+      ),
+      body: _LazyIndexedStack(
         index: _index,
         children: const [
           DashboardScreen(),
@@ -78,11 +115,74 @@ class _MainShellState extends State<MainShell> {
       ),
     );
   }
+
+  Future<void> _showAccount(BuildContext context, String userName) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const ListTile(
+              leading: Icon(Icons.account_circle, size: 40),
+              title: Text('Signed in'),
+              subtitle: Text(
+                'KASIR POS · Owner / Admin monitoring',
+                style: TextStyle(fontSize: 12),
+              ),
+            ),
+            if (userName.isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.badge_outlined),
+                title: Text(userName),
+                subtitle: const Text('Account'),
+              ),
+            const SizedBox(height: 8),
+            FilledButton.icon(
+              onPressed: () => Navigator.of(sheetContext).pop(),
+              icon: const Icon(Icons.check, size: 18),
+              label: const Text('Done'),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-/// Lightweight value used by [MainShell.select] to rebuild on user changes.
-class AuthSessionInfo {
-  const AuthSessionInfo(this.userName);
+/// [IndexedStack] that only builds a child once it has been selected,
+/// avoiding a burst of API calls on startup while preserving state.
+class _LazyIndexedStack extends StatefulWidget {
+  const _LazyIndexedStack({required this.index, required this.children});
 
-  final String userName;
+  final int index;
+  final List<Widget> children;
+
+  @override
+  State<_LazyIndexedStack> createState() => _LazyIndexedStackState();
+}
+
+class _LazyIndexedStackState extends State<_LazyIndexedStack> {
+  final Set<int> _visited = {0};
+
+  @override
+  Widget build(BuildContext context) {
+    _visited.add(widget.index);
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        for (var i = 0; i < widget.children.length; i++)
+          if (_visited.contains(i))
+            Offstage(
+              offstage: i != widget.index,
+              child: TickerMode(
+                enabled: i == widget.index,
+                child: widget.children[i],
+              ),
+            ),
+      ],
+    );
+  }
 }
