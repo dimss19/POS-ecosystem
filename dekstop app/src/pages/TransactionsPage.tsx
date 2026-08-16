@@ -8,6 +8,7 @@ import { useEffect } from 'react';
 import { useTransactionStore } from '../stores/transactionStore';
 import { useProductStore } from '../stores/productStore';
 import { formatRupiah, formatDate, shortId } from '../utils/format';
+import { printReceipt } from '../services/printer';
 
 export default function TransactionsPage() {
   const {
@@ -145,16 +146,26 @@ export default function TransactionsPage() {
                   Kasir: {selectedTx.cashier_name}
                 </p>
               </div>
-              {selectedTx.status !== 'VOID' && (
+              <div className="flex gap-2">
                 <button
-                  id="btn-void"
+                  id="btn-print"
                   type="button"
-                  onClick={() => handleVoid(selectedTx.id)}
-                  className="px-4 py-2 rounded-xl bg-danger-600 hover:bg-danger-500 text-white text-xs font-bold transition-all shadow-md active:scale-95"
+                  onClick={() => printReceipt(selectedTx, selectedTransactionItems)}
+                  className="px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-500 text-white text-xs font-bold transition-all shadow-md active:scale-95"
                 >
-                  Pembatalan (Void)
+                  Cetak Struk
                 </button>
-              )}
+                {selectedTx.status !== 'VOID' && (
+                  <button
+                    id="btn-void"
+                    type="button"
+                    onClick={() => handleVoid(selectedTx.id)}
+                    className="px-4 py-2 rounded-xl bg-danger-600 hover:bg-danger-500 text-white text-xs font-bold transition-all shadow-md active:scale-95"
+                  >
+                    Pembatalan (Void)
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Item List */}

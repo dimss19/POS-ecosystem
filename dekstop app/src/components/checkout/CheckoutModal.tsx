@@ -10,6 +10,7 @@ import { useCartStore } from '../../stores/cartStore';
 import { useTransactionStore } from '../../stores/transactionStore';
 import { useAuthStore } from '../../stores/authStore';
 import { formatRupiah } from '../../utils/format';
+import { printReceipt } from '../../services/printer';
 import type { PaymentMethod } from '../../types';
 
 interface CheckoutModalProps {
@@ -91,7 +92,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
       const cashierId = user?.id || 1;
       const cashierName = user?.name || 'Kasir';
 
-      await createTransaction({
+      const tx = await createTransaction({
         shiftId,
         cashierId,
         cashierName,
@@ -110,6 +111,24 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
           subtotal: i.subtotal
         }))
       });
+
+      // Attempt automatic print receipt (failsafe)
+      try {
+        const formattedItems = items.map((i, idx) => ({
+          id: idx,
+          transaction_id: tx.id,
+          product_id: i.product_id,
+          product_name: i.product_name,
+          price: i.price,
+          quantity: i.quantity,
+          subtotal: i.subtotal,
+          created_at: tx.created_at
+        }));
+        await printReceipt(tx, formattedItems);
+      } catch {
+        // Printer failure must NOT invalidate transaction
+        console.warn('Printer failure. Receipt was not printed automatically.');
+      }
 
       clearCart();
       onSuccess();
