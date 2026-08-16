@@ -9,8 +9,10 @@
  */
 
 import { useEffect, useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProductStore } from '../stores/productStore';
 import { useCartStore } from '../stores/cartStore';
+import { useShiftStore } from '../stores/shiftStore';
 import { useBarcodeScanner } from '../hooks/useBarcodeScanner';
 import SearchBar from '../components/pos/SearchBar';
 import ProductGrid from '../components/pos/ProductGrid';
@@ -19,8 +21,11 @@ import CheckoutModal from '../components/checkout/CheckoutModal';
 import type { Product } from '../types';
 
 export default function POSPage() {
+  const navigate = useNavigate();
   const { products, categories, isLoading, loadProducts, loadCategories, searchProducts, setCategory, selectedCategoryId, findByBarcode } = useProductStore();
   const { addItem } = useCartStore();
+  const { activeShift, loadActiveShift } = useShiftStore();
+
   const [barcodeError, setBarcodeError] = useState<string | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
@@ -28,7 +33,8 @@ export default function POSPage() {
   useEffect(() => {
     loadProducts();
     loadCategories();
-  }, [loadProducts, loadCategories]);
+    loadActiveShift();
+  }, [loadProducts, loadCategories, loadActiveShift]);
 
   // Handle barcode scan from HID scanner
   const handleBarcodeScan = useCallback(
@@ -71,6 +77,28 @@ export default function POSPage() {
   const handleCheckout = () => {
     setIsCheckoutOpen(true);
   };
+
+  if (!activeShift && !isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full bg-surface-950 p-6">
+        <div className="max-w-md w-full bg-surface-900 border border-surface-700/50 rounded-2xl p-8 text-center shadow-card animate-scale-in">
+          <div className="text-6xl mb-4">🕐</div>
+          <h2 className="text-2xl font-bold text-surface-100 mb-2">Shift Aktif Belum Dibuka</h2>
+          <p className="text-surface-400 text-sm mb-6">
+            Anda harus membuka shift baru dengan memasukkan modal kas awal sebelum dapat menggunakan mesin kasir untuk penjualan.
+          </p>
+          <button
+            id="btn-goto-shift"
+            type="button"
+            onClick={() => navigate('/shift')}
+            className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-xl transition-all shadow-md active:scale-95"
+          >
+            Buka Shift Sekarang
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full">
