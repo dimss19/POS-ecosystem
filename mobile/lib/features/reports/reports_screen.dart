@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/cache_banner.dart';
+import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/loading_view.dart';
 import '../../core/widgets/metric_card.dart';
 import '../../core/widgets/section_card.dart';
@@ -304,6 +305,201 @@ class _PaymentRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+class _ProductsTab extends StatelessWidget {
+  const _ProductsTab({required this.controller});
+
+  final ReportsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = controller.products;
+    final rows = state.data ?? const <ProductReportRow>[];
+
+    return _ReportBody(
+      isLoading: state.isLoading,
+      hasData: state.hasData,
+      fromCache: state.fromCache,
+      lastUpdated: state.lastUpdated,
+      onRetry: controller.refresh,
+      emptyMessage: 'Unable to load product report.',
+      child: rows.isEmpty
+          ? const EmptyState(
+              icon: Icons.shopping_bag_outlined,
+              title: 'No product data',
+            )
+          : RefreshIndicator(
+              onRefresh: controller.refresh,
+              child: ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                itemCount: rows.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (context, index) {
+                  final row = rows[index];
+                  return Card(
+                    margin: EdgeInsets.zero,
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        radius: 18,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primaryContainer,
+                        child: const Icon(Icons.shopping_bag_outlined,
+                            size: 18),
+                      ),
+                      title: Text(
+                        row.name.isEmpty ? 'Unknown product' : row.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text(
+                        '${AppFormatters.quantity(row.quantitySold)} sold · '
+                        'SKU ${row.sku.isEmpty ? '-' : row.sku}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      trailing: Text(
+                        AppFormatters.money(row.revenue),
+                        style:
+                            const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+    );
+  }
+}
+class _CashiersTab extends StatelessWidget {
+  const _CashiersTab({required this.controller});
+
+  final ReportsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = controller.cashiers;
+    final rows = state.data ?? const <CashierReportRow>[];
+
+    return _ReportBody(
+      isLoading: state.isLoading,
+      hasData: state.hasData,
+      fromCache: state.fromCache,
+      lastUpdated: state.lastUpdated,
+      onRetry: controller.refresh,
+      emptyMessage: 'Unable to load cashier report.',
+      child: rows.isEmpty
+          ? const EmptyState(
+              icon: Icons.people_outline,
+              title: 'No cashier data',
+            )
+          : RefreshIndicator(
+              onRefresh: controller.refresh,
+              child: ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                itemCount: rows.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (context, index) {
+                  final row = rows[index];
+                  final scheme = Theme.of(context).colorScheme;
+                  return Card(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: scheme.secondaryContainer,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              _initials(row.name),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: scheme.onSecondaryContainer,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  row.name.isEmpty ? 'Cashier' : row.name,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  '${AppFormatters.number(row.transactionCount)} '
+                                  'transaction(s)',
+                                  style: TextStyle(
+                                      fontSize: 12.5, color: scheme.outline),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            AppFormatters.money(row.salesTotal),
+                            style: const TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w800),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+    );
+  }
+
+  static String _initials(String name) {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return '?';
+    final parts = trimmed.split(RegExp(r'\s+'));
+    if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
+    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
+        .toUpperCase();
+  }
+}
+class _ReportBody extends StatelessWidget {
+  const _ReportBody({
+    required this.isLoading,
+    required this.hasData,
+    required this.fromCache,
+    required this.lastUpdated,
+    required this.onRetry,
+    required this.child,
+    required this.emptyMessage,
+  });
+
+  final bool isLoading;
+  final bool hasData;
+  final bool fromCache;
+  final DateTime? lastUpdated;
+  final VoidCallback onRetry;
+  final Widget child;
+  final String emptyMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading && !hasData) return const LoadingView();
+    if (!hasData) return ErrorView(message: emptyMessage, onRetry: onRetry);
+
+    return Column(
+      children: [
+        CacheBanner(visible: fromCache, lastUpdated: lastUpdated),
+        Expanded(child: child),
+      ],
     );
   }
 }

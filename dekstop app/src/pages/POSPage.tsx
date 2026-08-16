@@ -15,12 +15,14 @@ import { useBarcodeScanner } from '../hooks/useBarcodeScanner';
 import SearchBar from '../components/pos/SearchBar';
 import ProductGrid from '../components/pos/ProductGrid';
 import Cart from '../components/pos/Cart';
+import CheckoutModal from '../components/checkout/CheckoutModal';
 import type { Product } from '../types';
 
 export default function POSPage() {
   const { products, categories, isLoading, loadProducts, loadCategories, searchProducts, setCategory, selectedCategoryId, findByBarcode } = useProductStore();
   const { addItem } = useCartStore();
   const [barcodeError, setBarcodeError] = useState<string | null>(null);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   // Load data on mount
   useEffect(() => {
@@ -66,9 +68,8 @@ export default function POSPage() {
     });
   };
 
-  // Handle checkout button press — will be implemented in Part 5
   const handleCheckout = () => {
-    // TODO: Part 5 — Open checkout modal
+    setIsCheckoutOpen(true);
   };
 
   return (
@@ -133,6 +134,15 @@ export default function POSPage() {
       <div className="w-96 shrink-0">
         <Cart onCheckout={handleCheckout} />
       </div>
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        onSuccess={() => {
+          loadProducts(); // Refresh stock in UI
+        }}
+      />
     </div>
   );
 }
