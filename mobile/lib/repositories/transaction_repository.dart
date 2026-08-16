@@ -96,7 +96,7 @@ class TransactionRepository {
         'per_page': '$perPage',
         ...filters.toQuery(),
       });
-      final result = ApiPaging.paginate(data, Transaction.fromJson);
+      final result = ApiPaging.paginate<Transaction>(data, Transaction.fromJson);
       if (page == 1 && result.items.isNotEmpty) {
         await _cache.put(CacheKeys.recentTransactions, data);
       }
@@ -107,7 +107,7 @@ class TransactionRepository {
         final cached = await _cache.get(CacheKeys.recentTransactions);
         if (cached != null) {
           final cachedPage =
-              ApiPaging.paginate(cached.payload, Transaction.fromJson);
+              ApiPaging.paginate<Transaction>(cached.payload, Transaction.fromJson);
           final filtered = _applyLocalFilters(cachedPage.items, filters);
           return RepoResult.cached(
             Paginated<Transaction>(

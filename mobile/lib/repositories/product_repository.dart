@@ -21,7 +21,7 @@ class ProductRepository {
     try {
       final data = await _api
           .get('/products', query: {'per_page': _perPage});
-      final products = ApiPaging.asList(data, Product.fromJson);
+      final products = ApiPaging.asList<Product>(data, Product.fromJson);
       if (products.isNotEmpty) {
         await _cache.put(CacheKeys.products, data);
       }
@@ -31,7 +31,7 @@ class ProductRepository {
       final cached = await _cache.get(CacheKeys.products);
       if (cached != null) {
         return RepoResult.cached(
-          ApiPaging.asList(cached.payload, Product.fromJson),
+          ApiPaging.asList<Product>(cached.payload, Product.fromJson),
           cached.lastUpdated,
         );
       }
@@ -42,7 +42,7 @@ class ProductRepository {
   Future<RepoResult<List<Category>>> fetchCategories() async {
     try {
       final data = await _api.get('/categories');
-      final categories = ApiPaging.asList(data, Category.fromJson);
+      final categories = ApiPaging.asList<Category>(data, Category.fromJson);
       await _cache.put(CacheKeys.categories, data);
       return RepoResult.fresh(categories);
     } on ApiException catch (e) {
@@ -50,7 +50,7 @@ class ProductRepository {
       final cached = await _cache.get(CacheKeys.categories);
       if (cached != null) {
         return RepoResult.cached(
-          ApiPaging.asList(cached.payload, Category.fromJson),
+          ApiPaging.asList<Category>(cached.payload, Category.fromJson),
           cached.lastUpdated,
         );
       }

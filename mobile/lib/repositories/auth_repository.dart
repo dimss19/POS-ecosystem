@@ -100,7 +100,9 @@ class AuthRepository {
       if (e.isNetwork) {
         return RestoreResult.offline(cached);
       }
-      rethrow;
+      return const RestoreResult.none();
+    } catch (_) {
+      return const RestoreResult.none();
     }
   }
 

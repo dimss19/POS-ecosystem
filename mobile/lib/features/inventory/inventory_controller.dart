@@ -26,6 +26,7 @@ class InventoryController extends ChangeNotifier {
   UiState<List<Product>> get overview => _overview;
   UiState<List<StockMovement>> get movements => _movements;
   bool get lowStockOnly => _lowStockOnly;
+  int? get viewedProductId => _viewedProductId;
   bool get adjusting => _adjusting;
   String? get adjustmentError => _adjustmentError;
 

@@ -5,6 +5,7 @@ import '../../core/utils/formatters.dart';
 import '../../core/widgets/cache_banner.dart';
 import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/loading_view.dart';
+import '../../core/widgets/status_chip.dart';
 import '../../models/transaction.dart';
 import '../../repositories/transaction_repository.dart';
 import '../shell/shell_app_bar_actions.dart';
@@ -115,7 +116,7 @@ class _TransactionListScreenState extends State<TransactionListScreen> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
                     itemCount: items.length + (controller.hasMore ? 1 : 0),
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       if (index >= items.length) {
                         return _LoadMoreButton(controller: controller);
@@ -393,7 +394,7 @@ class _FilterSheetState extends State<_FilterSheet> {
               onChanged: (value) => setState(() => _status = value),
             ),
             const SizedBox(height: 14),
-            TextField(
+            TextFormField(
               initialValue: _cashier,
               onChanged: (value) => _cashier = value,
               decoration: const InputDecoration(

@@ -39,6 +39,7 @@ class ShellAppBarActions extends StatelessWidget {
   }
 
   Future<void> _signOut(BuildContext context) async {
+    final auth = context.read<AuthController>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -57,7 +58,7 @@ class ShellAppBarActions extends StatelessWidget {
       ),
     );
     if (confirmed == true) {
-      await context.read<AuthController>().logout();
+      await auth.logout();
     }
   }
 }

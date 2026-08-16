@@ -82,11 +82,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     if (!mounted) return;
     if (success) Navigator.of(context).pop();
   }
-@override
+  @override
   Widget build(BuildContext context) {
     final controller = context.watch<ProductsController>();
     final categories = controller.categories;
-    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(title: Text(isEditing ? 'Edit Product' : 'New Product')),

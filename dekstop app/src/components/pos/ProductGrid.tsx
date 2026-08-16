@@ -1,9 +1,6 @@
-/**
- * KASIR POS — Product Grid
- */
-
 import type { Product } from '../../types';
 import ProductCard from './ProductCard';
+import { PackageIcon } from '../icons';
 
 interface ProductGridProps {
   products: Product[];
@@ -18,7 +15,7 @@ export default function ProductGrid({ products, isLoading, onAddToCart }: Produc
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-            className="h-28 rounded-xl bg-surface-800 border border-surface-700/30 animate-pulse"
+            className="h-28 rounded-xl bg-surface-900 border border-surface-700/50 animate-pulse"
           />
         ))}
       </div>
@@ -28,8 +25,8 @@ export default function ProductGrid({ products, isLoading, onAddToCart }: Produc
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-surface-400">
-        <span className="text-4xl mb-3">📦</span>
-        <p className="text-sm">Tidak ada produk ditemukan</p>
+        <PackageIcon size={40} className="mb-2 stroke-1 text-surface-400" />
+        <p className="text-sm font-medium">Tidak ada produk ditemukan</p>
       </div>
     );
   }

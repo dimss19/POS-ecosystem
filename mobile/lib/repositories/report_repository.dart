@@ -44,8 +44,8 @@ class ReportRepository {
     DateTime? from,
     DateTime? to,
   }) {
-    return _fetchReport<SalesReport>(
-      '/reports/sales',
+    return _fetch<SalesReport>(
+      path: '/reports/sales',
       from: from,
       to: to,
       cacheKey: CacheKeys.salesReport,
@@ -58,7 +58,7 @@ class ReportRepository {
     DateTime? to,
   }) {
     return _fetchReportList<ProductReportRow>(
-      '/reports/products',
+      path: '/reports/products',
       from: from,
       to: to,
       cacheKey: CacheKeys.productReport,
@@ -71,7 +71,7 @@ class ReportRepository {
     DateTime? to,
   }) {
     return _fetchReportList<CashierReportRow>(
-      '/reports/cashiers',
+      path: '/reports/cashiers',
       from: from,
       to: to,
       cacheKey: CacheKeys.cashierReport,

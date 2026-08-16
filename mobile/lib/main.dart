@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -44,11 +45,13 @@ class _KasirMobileAppState extends State<KasirMobileApp> {
     super.initState();
     _api = ApiClient(baseUrl: AppConfig.apiBaseUrl);
     _cache = AppCache();
-    _tokenStorage = SecureTokenStorage();
+    _tokenStorage = kIsWeb ? InMemoryTokenStorage() : SecureTokenStorage();
     final authRepository =
         AuthRepository(api: _api, storage: _tokenStorage);
     _authController = AuthController(repository: authRepository);
     _reportRepository = ReportRepository(api: _api, cache: _cache);
+
+    _authController.bootstrap();
 
     // Token expired / revoked -> clear session and go to login.
     _api.onUnauthorized = () {

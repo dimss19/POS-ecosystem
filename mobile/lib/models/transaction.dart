@@ -1,4 +1,5 @@
 import '../core/utils/json_utils.dart';
+import '../models/paginated.dart';
 
 /// Payment methods defined by the API contract.
 enum PaymentMethod {
@@ -138,7 +139,7 @@ class Transaction {
       return transactionNumber!;
     }
     if (uuid != null && uuid!.isNotEmpty) {
-      return uuid!.toUpperCase().substring(0, mathMin(8, uuid!.length));
+      return uuid!.toUpperCase().substring(0, uuid!.length > 8 ? 8 : uuid!.length);
     }
     return 'TRX-${id ?? '-'}';
   }

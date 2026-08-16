@@ -1,9 +1,6 @@
-/**
- * KASIR POS — Cart Item Row
- */
-
 import type { CartItem } from '../../types';
 import { formatRupiah } from '../../utils/format';
+import { XIcon } from '../icons';
 
 interface CartItemRowProps {
   item: CartItem;
@@ -19,10 +16,10 @@ export default function CartItemRow({
   onRemove,
 }: CartItemRowProps) {
   return (
-    <div className="flex items-center gap-3 py-3 px-4 border-b border-surface-700/30 last:border-0 animate-slide-right">
+    <div className="flex items-center gap-2.5 py-3 px-4 border-b border-surface-700/60 last:border-0 hover:bg-surface-800/40 transition-colors animate-slide-right">
       {/* Product Info */}
       <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-medium text-surface-100 truncate">
+        <h4 className="text-sm font-semibold text-surface-100 truncate">
           {item.product_name}
         </h4>
         <span className="text-xs text-surface-400">
@@ -35,18 +32,18 @@ export default function CartItemRow({
         <button
           type="button"
           onClick={() => onDecrease(item.product_id)}
-          className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-700 text-surface-300 hover:bg-surface-600 transition-colors text-sm font-bold"
+          className="w-6 h-6 flex items-center justify-center rounded-md bg-surface-800 border border-surface-700/60 text-surface-300 hover:bg-surface-700 hover:text-surface-100 transition-colors text-xs font-bold"
           aria-label="Kurangi jumlah"
         >
           −
         </button>
-        <span className="w-8 text-center text-sm font-semibold text-surface-100">
+        <span className="w-7 text-center text-xs font-bold text-surface-100">
           {item.quantity}
         </span>
         <button
           type="button"
           onClick={() => onIncrease(item.product_id)}
-          className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-700 text-surface-300 hover:bg-surface-600 transition-colors text-sm font-bold"
+          className="w-6 h-6 flex items-center justify-center rounded-md bg-surface-800 border border-surface-700/60 text-surface-300 hover:bg-surface-700 hover:text-surface-100 transition-colors text-xs font-bold"
           aria-label="Tambah jumlah"
         >
           +
@@ -54,7 +51,7 @@ export default function CartItemRow({
       </div>
 
       {/* Subtotal */}
-      <span className="w-24 text-right text-sm font-semibold text-primary-400">
+      <span className="w-20 text-right text-xs font-bold text-primary-600">
         {formatRupiah(item.subtotal)}
       </span>
 
@@ -62,10 +59,10 @@ export default function CartItemRow({
       <button
         type="button"
         onClick={() => onRemove(item.product_id)}
-        className="w-7 h-7 flex items-center justify-center rounded-lg text-surface-500 hover:bg-danger-500/20 hover:text-danger-400 transition-colors"
+        className="w-6 h-6 flex items-center justify-center rounded-md text-surface-400 hover:bg-danger-50 hover:text-danger-600 transition-colors"
         aria-label="Hapus item"
       >
-        ✕
+        <XIcon size={14} />
       </button>
     </div>
   );

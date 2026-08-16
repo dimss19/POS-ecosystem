@@ -1,7 +1,3 @@
-/**
- * KASIR POS — Product Card
- */
-
 import type { Product } from '../../types';
 import { formatRupiah } from '../../utils/format';
 
@@ -20,45 +16,45 @@ export default function ProductCard({ product, onAdd }: ProductCardProps) {
       type="button"
       onClick={() => !isOutOfStock && onAdd(product)}
       disabled={isOutOfStock}
-      className={`flex flex-col p-3 rounded-xl border text-left transition-all duration-200 ${
+      className={`flex flex-col p-3.5 rounded-xl border text-left transition-all duration-150 ${
         isOutOfStock
-          ? 'bg-surface-800/50 border-surface-700/30 opacity-50 cursor-not-allowed'
-          : 'bg-surface-800 border-surface-700/50 hover:border-primary-500/50 hover:shadow-card-hover active:scale-[0.98] cursor-pointer'
+          ? 'bg-surface-800/40 border-surface-700/40 opacity-60 cursor-not-allowed'
+          : 'bg-surface-900 border-surface-700/80 hover:border-primary-400 hover:shadow-card active:scale-[0.98] cursor-pointer'
       }`}
     >
       {/* Product Name */}
-      <h3 className="text-sm font-medium text-surface-100 truncate w-full">
+      <h3 className="text-sm font-semibold text-surface-100 truncate w-full">
         {product.name}
       </h3>
 
-      {/* SKU */}
+      {/* SKU / Barcode */}
       {product.sku && (
-        <span className="text-xs text-surface-500 mt-0.5 truncate w-full">
+        <span className="text-xs font-mono text-surface-400 mt-0.5 truncate w-full">
           {product.sku}
         </span>
       )}
 
       {/* Price */}
-      <span className="text-sm font-bold text-primary-400 mt-2">
+      <span className="text-sm font-bold text-primary-600 mt-2">
         {formatRupiah(product.price)}
       </span>
 
       {/* Stock */}
-      <span
-        className={`text-xs mt-1 ${
-          isOutOfStock
-            ? 'text-danger-400'
-            : isLowStock
-            ? 'text-warning-400'
-            : 'text-surface-400'
-        }`}
-      >
-        {isOutOfStock
-          ? 'Stok habis'
-          : isLowStock
-          ? `Stok: ${product.stock} (rendah)`
-          : `Stok: ${product.stock}`}
-      </span>
+      <div className="mt-1">
+        {isOutOfStock ? (
+          <span className="inline-block px-1.5 py-0.5 rounded text-[11px] font-semibold bg-danger-50 text-danger-600 border border-danger-200/50">
+            Stok habis
+          </span>
+        ) : isLowStock ? (
+          <span className="inline-block px-1.5 py-0.5 rounded text-[11px] font-semibold bg-warning-50 text-warning-600 border border-warning-200/50">
+            Stok: {product.stock} (menipis)
+          </span>
+        ) : (
+          <span className="text-xs text-surface-400">
+            Stok: {product.stock}
+          </span>
+        )}
+      </div>
     </button>
   );
 }

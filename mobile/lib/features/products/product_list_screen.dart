@@ -104,7 +104,7 @@ class _Body extends StatelessWidget {
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
                     itemCount: controller.visibleProducts.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final product = controller.visibleProducts[index];
                       return _ProductCard(

@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// Simple key/value JSON cache persisted in SQLite.
@@ -23,8 +23,10 @@ class AppCache {
   final bool useInMemory;
 
   Database? _db;
+  final Map<String, CachedEntry> _webCache = {};
 
-  Future<Database> get database async {
+  Future<Database?> get database async {
+    if (kIsWeb) return null;
     if (_db != null && _db!.isOpen) return _db!;
 
     var factory = _factoryOverride ?? databaseFactory;
@@ -38,8 +40,6 @@ class AppCache {
       return _db!;
     }
 
-    // Provide an FFI SQLite for desktop so the cache also works during local
-    // development and tests on Windows/Linux/macOS.
     if (!Platform.isAndroid && !Platform.isIOS) {
       sqfliteFfiInit();
       if (_factoryOverride == null) {
@@ -64,7 +64,15 @@ class AppCache {
   }
 
   Future<void> put(String key, dynamic payload) async {
+    if (kIsWeb) {
+      _webCache[key] = CachedEntry(
+        payload: payload,
+        lastUpdated: DateTime.now(),
+      );
+      return;
+    }
     final db = await database;
+    if (db == null) return;
     await db.insert('cache', {
       'key': key,
       'payload': jsonEncode(payload),
@@ -73,7 +81,11 @@ class AppCache {
   }
 
   Future<CachedEntry?> get(String key) async {
+    if (kIsWeb) {
+      return _webCache[key];
+    }
     final db = await database;
+    if (db == null) return null;
     final rows = await db.query('cache',
         where: 'key = ?', whereArgs: [key], limit: 1);
     if (rows.isEmpty) return null;
@@ -85,13 +97,25 @@ class AppCache {
   }
 
   Future<void> remove(String key) async {
+    if (kIsWeb) {
+      _webCache.remove(key);
+      return;
+    }
     final db = await database;
-    await db.delete('cache', where: 'key = ?', whereArgs: [key]);
+    if (db != null) {
+      await db.delete('cache', where: 'key = ?', whereArgs: [key]);
+    }
   }
 
   Future<void> clearAll() async {
+    if (kIsWeb) {
+      _webCache.clear();
+      return;
+    }
     final db = await database;
-    await db.delete('cache');
+    if (db != null) {
+      await db.delete('cache');
+    }
   }
 }
 

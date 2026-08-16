@@ -1,13 +1,3 @@
-/**
- * KASIR POS — Main POS (Kasir) Page
- *
- * Primary cashier screen with:
- * - Search bar + barcode input (left panel)
- * - Category filter (left panel)
- * - Product grid (left panel)
- * - Cart (right panel)
- */
-
 import { useEffect, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProductStore } from '../stores/productStore';
@@ -18,6 +8,7 @@ import SearchBar from '../components/pos/SearchBar';
 import ProductGrid from '../components/pos/ProductGrid';
 import Cart from '../components/pos/Cart';
 import CheckoutModal from '../components/checkout/CheckoutModal';
+import { ClockIcon, AlertTriangleIcon } from '../components/icons';
 import type { Product } from '../types';
 
 export default function POSPage() {
@@ -81,17 +72,19 @@ export default function POSPage() {
   if (!activeShift && !isLoading) {
     return (
       <div className="flex items-center justify-center h-full bg-surface-950 p-6">
-        <div className="max-w-md w-full bg-surface-900 border border-surface-700/50 rounded-2xl p-8 text-center shadow-card animate-scale-in">
-          <div className="text-6xl mb-4">🕐</div>
-          <h2 className="text-2xl font-bold text-surface-100 mb-2">Shift Aktif Belum Dibuka</h2>
-          <p className="text-surface-400 text-sm mb-6">
-            Anda harus membuka shift baru dengan memasukkan modal kas awal sebelum dapat menggunakan mesin kasir untuk penjualan.
+        <div className="max-w-md w-full bg-surface-900 border border-surface-700/80 rounded-2xl p-8 text-center shadow-card animate-scale-in">
+          <div className="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center mx-auto mb-4 border border-primary-200/50">
+            <ClockIcon size={32} />
+          </div>
+          <h2 className="text-xl font-bold text-surface-100 mb-2">Shift Kasir Belum Dibuka</h2>
+          <p className="text-surface-400 text-sm mb-6 leading-relaxed">
+            Anda harus membuka shift baru dengan memasukkan modal kas awal sebelum dapat melakukan transaksi penjualan.
           </p>
           <button
             id="btn-goto-shift"
             type="button"
             onClick={() => navigate('/shift')}
-            className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-xl transition-all shadow-md active:scale-95"
+            className="w-full py-3.5 px-4 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-xl transition-all shadow-md shadow-primary-600/20 active:scale-95 text-sm"
           >
             Buka Shift Sekarang
           </button>
@@ -101,7 +94,7 @@ export default function POSPage() {
   }
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full bg-surface-950">
       {/* Left Panel — Products */}
       <div className="flex flex-col flex-1 min-w-0">
         {/* Search Bar */}
@@ -114,8 +107,9 @@ export default function POSPage() {
 
         {/* Barcode Error */}
         {barcodeError && (
-          <div className="mx-4 mt-2 px-4 py-2 rounded-lg bg-danger-500/10 border border-danger-500/30 text-danger-400 text-sm animate-fade-in">
-            {barcodeError}
+          <div className="mx-4 mt-2 px-4 py-2.5 rounded-xl bg-danger-50 border border-danger-200 text-danger-700 text-xs font-semibold animate-fade-in flex items-center gap-2">
+            <AlertTriangleIcon size={16} className="text-danger-600 shrink-0" />
+            <span>{barcodeError}</span>
           </div>
         )}
 
@@ -124,10 +118,10 @@ export default function POSPage() {
           <button
             type="button"
             onClick={() => setCategory(null)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
               selectedCategoryId === null
-                ? 'bg-primary-600 text-white'
-                : 'bg-surface-800 text-surface-400 hover:text-surface-200'
+                ? 'bg-primary-600 text-white shadow-xs'
+                : 'bg-surface-900 border border-surface-700/80 text-surface-300 hover:text-surface-100 hover:bg-surface-800'
             }`}
           >
             Semua
@@ -137,10 +131,10 @@ export default function POSPage() {
               key={cat.id}
               type="button"
               onClick={() => setCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                 selectedCategoryId === cat.id
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-surface-800 text-surface-400 hover:text-surface-200'
+                  ? 'bg-primary-600 text-white shadow-xs'
+                  : 'bg-surface-900 border border-surface-700/80 text-surface-300 hover:text-surface-100 hover:bg-surface-800'
               }`}
             >
               {cat.name}

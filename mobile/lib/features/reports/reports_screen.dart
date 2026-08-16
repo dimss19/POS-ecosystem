@@ -59,7 +59,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
   @override
   Widget build(BuildContext context) {
     final controller = context.watch<ReportsController>();
-    final scheme = Theme.of(context).colorScheme;
 
     return DefaultTabController(
       length: 3,
@@ -124,7 +123,6 @@ class _RangeBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final hasRange = from != null || to != null;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
@@ -336,7 +334,7 @@ class _ProductsTab extends StatelessWidget {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
                 itemCount: rows.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                separatorBuilder: (_, _) => const SizedBox(height: 10),
                 itemBuilder: (context, index) {
                   final row = rows[index];
                   return Card(
@@ -401,7 +399,7 @@ class _CashiersTab extends StatelessWidget {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(16),
                 itemCount: rows.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                separatorBuilder: (_, _) => const SizedBox(height: 10),
                 itemBuilder: (context, index) {
                   final row = rows[index];
                   final scheme = Theme.of(context).colorScheme;

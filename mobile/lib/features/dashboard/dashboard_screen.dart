@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/widgets/empty_state.dart';
 import '../../core/widgets/loading_view.dart';
 import '../shell/shell_app_bar_actions.dart';
 import 'dashboard_content.dart';

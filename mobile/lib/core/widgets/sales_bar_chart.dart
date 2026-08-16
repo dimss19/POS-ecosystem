@@ -19,8 +19,9 @@ class SalesBarChart extends StatelessWidget {
 
     final visible =
         points.length > 14 ? points.sublist(points.length - 14) : points;
-    final maxValue = visible.map((p) => p.value).reduce((a, b) => a > b ? a : b);
-    final idealMax = (maxValue * 1.2).clamp(1000, double.infinity);
+    final maxValue =
+        visible.map((p) => p.value.toDouble()).reduce((a, b) => a > b ? a : b);
+    final idealMax = (maxValue * 1.2).clamp(1000, double.infinity).toDouble();
 
     return SizedBox(
       height: 180,

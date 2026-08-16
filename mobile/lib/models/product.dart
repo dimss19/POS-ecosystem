@@ -117,7 +117,7 @@ class ProductDraft {
   /// Keep two decimals for all monetary payloads.
   static String _money(String raw) {
     var parsed = double.tryParse(raw.replaceAll(',', '.').trim());
-    if (parsed == null) parsed = 0;
+    parsed ??= 0;
     return parsed.toStringAsFixed(2);
   }
 }

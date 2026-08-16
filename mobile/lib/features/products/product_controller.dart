@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' hide Category;
 
 import '../../core/network/api_exception.dart';
 import '../../core/state/ui_state.dart';
@@ -66,13 +66,10 @@ class ProductsController extends ChangeNotifier {
     _categoriesState = const UiState.loading();
     notifyListeners();
 
-    final results = await Future.wait([
+    await Future.wait([
       _loadProducts(),
       _loadCategories(),
     ]);
-
-    _state = results[0] as UiState<List<Product>>;
-    _categoriesState = results[1] as UiState<List<Category>>;
 
     if (_state.hasData) {
       await _syncCategories();

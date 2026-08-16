@@ -22,20 +22,31 @@ class Paginated<T> {
 class ApiPaging {
   ApiPaging._();
 
-  static List<T> asList<T>(dynamic raw, T Function(dynamic) fromJson) {
-    if (raw is List) return raw.map(fromJson).toList();
+  static List<T> asList<T>(dynamic raw, T Function(Map<String, dynamic>) fromJson) {
+    if (raw is List) {
+      return raw
+          .map((e) => fromJson(e is Map<String, dynamic> ? e : <String, dynamic>{}))
+          .toList();
+    }
     if (raw is Map<String, dynamic>) {
       for (final key in const ['data', 'items', 'results', 'records']) {
         final value = raw[key];
-        if (value is List) return value.map(fromJson).toList();
+        if (value is List) {
+          return value
+              .map((e) => fromJson(e is Map<String, dynamic> ? e : <String, dynamic>{}))
+              .toList();
+        }
       }
     }
     return <T>[];
   }
 
-  static Paginated<T> paginate<T>(dynamic raw, T Function(dynamic) fromJson) {
+  static Paginated<T> paginate<T>(dynamic raw, T Function(Map<String, dynamic>) fromJson) {
     if (raw is List) {
-      return Paginated<T>(items: raw.map(fromJson).toList(), page: 1);
+      final items = raw
+          .map((e) => fromJson(e is Map<String, dynamic> ? e : <String, dynamic>{}))
+          .toList();
+      return Paginated<T>(items: items, page: 1);
     }
 
     if (raw is Map<String, dynamic>) {
@@ -69,8 +80,12 @@ class ApiPaging {
           meta?['last_page'] ?? meta?['total_pages'] ?? raw['last_page'],
           fallback: page);
 
+      final items = list
+          .map((e) => fromJson(e is Map<String, dynamic> ? e : <String, dynamic>{}))
+          .toList();
+
       return Paginated<T>(
-        items: list.map(fromJson).toList(),
+        items: items,
         page: page,
         total: total,
         hasMore: page < lastPage,

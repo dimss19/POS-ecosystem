@@ -8,8 +8,8 @@ class RepoResult<T> {
 
   const RepoResult.fresh(T value) : this._(value: value, fromCache: false);
 
-  const RepoResult.cached(T value, this.lastUpdated)
-      : this._(value: value, fromCache: true);
+  const RepoResult.cached(T value, DateTime? lastUpdated)
+      : this._(value: value, fromCache: true, lastUpdated: lastUpdated);
 
   final T value;
 

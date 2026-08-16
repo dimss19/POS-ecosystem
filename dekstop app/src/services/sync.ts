@@ -23,8 +23,10 @@ export async function registerDevice(): Promise<boolean> {
   try {
     const deviceId = await getDeviceId();
     const result = await api.post('/api/devices/register', {
+      device_uuid: deviceId,
       device_id: deviceId,
-      name: 'KASIR POS Desktop App'
+      name: 'KASIR POS Desktop App',
+      app_version: '1.0.0',
     });
     return result.ok;
   } catch {
@@ -43,7 +45,7 @@ export async function getPendingSyncQueue(): Promise<SyncQueueItem[]> {
 
 /**
  * Process a single sync queue item.
- * Implements idempotency by sending device_id and unique entity_id.
+ * Implements idempotency by sending device_uuid and unique entity_id.
  */
 export async function processSyncItem(item: SyncQueueItem): Promise<boolean> {
   const deviceId = await getDeviceId();
@@ -60,11 +62,12 @@ export async function processSyncItem(item: SyncQueueItem): Promise<boolean> {
 
     // 3. POST to /api/sync/push
     const result = await api.post<{ success: boolean }>('/api/sync/push', {
+      device_uuid: deviceId,
       device_id: deviceId,
       entity_type: item.entity_type,
       entity_id: item.entity_id,
       operation: item.operation,
-      payload: parsedPayload
+      payload: parsedPayload,
     });
 
     if (result.ok) {
@@ -126,6 +129,7 @@ export async function pullData(): Promise<{ success: boolean; message: string }>
   try {
     const deviceId = await getDeviceId();
     const result = await api.post<{ categories: Category[]; products: Product[] }>('/api/sync/pull', {
+      device_uuid: deviceId,
       device_id: deviceId
     });
 
@@ -148,6 +152,12 @@ export async function pullData(): Promise<{ success: boolean; message: string }>
 
     // Cache products
     for (const prod of products) {
+      const rawProd = prod as unknown as Record<string, unknown>;
+      const price = Number(rawProd.sell_price ?? rawProd.price ?? 0);
+      const minStock = Number(rawProd.minimum_stock ?? rawProd.min_stock ?? 0);
+      const stock = Number(rawProd.stock ?? 0);
+      const isActive = rawProd.is_active ? 1 : 0;
+
       operations.push({
         sql: `INSERT INTO products (id, name, sku, barcode, price, stock, min_stock, is_active, category_id, image_url, created_at, updated_at) 
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
@@ -163,8 +173,8 @@ export async function pullData(): Promise<{ success: boolean; message: string }>
                 image_url = excluded.image_url, 
                 updated_at = excluded.updated_at`,
         bindValues: [
-          prod.id, prod.name, prod.sku || '', prod.barcode || '', prod.price, 
-          prod.stock, prod.min_stock, prod.is_active ? 1 : 0, prod.category_id, 
+          prod.id, prod.name, prod.sku || '', prod.barcode || '', price, 
+          stock, minStock, isActive, prod.category_id, 
           prod.image_url || null, prod.created_at, prod.updated_at
         ]
       });

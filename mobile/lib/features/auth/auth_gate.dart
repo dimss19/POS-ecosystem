@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/config/app_config.dart';
-import '../../models/user.dart';
 import 'splash_screen.dart';
 import '../shell/main_shell.dart';
 import 'login_screen.dart';
 import 'auth_controller.dart';
+import '../../models/user.dart';
 
 /// Root-level switch: Splash → Login ↔ MainShell, driven by [AuthController].
 class AuthGate extends StatelessWidget {

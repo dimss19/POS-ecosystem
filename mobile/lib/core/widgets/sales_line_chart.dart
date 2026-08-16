@@ -17,8 +17,9 @@ class SalesLineChart extends StatelessWidget {
       return const _LinePlaceholder(message: 'No weekly sales data');
     }
 
-    final maxValue = points.map((p) => p.value).reduce((a, b) => a > b ? a : b);
-    final idealMax = (maxValue * 1.2).clamp(1000, double.infinity);
+    final maxValue =
+        points.map((p) => p.value.toDouble()).reduce((a, b) => a > b ? a : b);
+    final idealMax = (maxValue * 1.2).clamp(1000, double.infinity).toDouble();
 
     return SizedBox(
       height: 180,

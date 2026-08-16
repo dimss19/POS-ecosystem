@@ -24,14 +24,14 @@ class InventoryRepository {
 
       try {
         data = await _api.get('/stock');
-        products = ApiPaging.asList(data, Product.fromJson);
+        products = ApiPaging.asList<Product>(data, Product.fromJson);
       } on ApiException {
         // Contract may expose the overview through /products instead.
       }
 
       if (products.isEmpty) {
         data = await _api.get('/products', query: {'per_page': 1000});
-        products = ApiPaging.asList(data, Product.fromJson);
+        products = ApiPaging.asList<Product>(data, Product.fromJson);
       }
 
       if (products.isNotEmpty) {
@@ -43,7 +43,7 @@ class InventoryRepository {
       final cached = await _cache.get(CacheKeys.stockOverview);
       if (cached != null) {
         return RepoResult.cached(
-          ApiPaging.asList(cached.payload, Product.fromJson),
+          ApiPaging.asList<Product>(cached.payload, Product.fromJson),
           cached.lastUpdated,
         );
       }
@@ -58,7 +58,7 @@ class InventoryRepository {
         if (productId != null) 'product_id': '$productId',
         'per_page': 200,
       });
-      final movements = ApiPaging.asList(data, StockMovement.fromJson);
+      final movements = ApiPaging.asList<StockMovement>(data, StockMovement.fromJson);
       await _cache.put(CacheKeys.stockMovements, data);
       return RepoResult.fresh(movements);
     } on ApiException catch (e) {
@@ -66,7 +66,7 @@ class InventoryRepository {
       final cached = await _cache.get(CacheKeys.stockMovements);
       if (cached != null) {
         return RepoResult.cached(
-          ApiPaging.asList(cached.payload, StockMovement.fromJson),
+          ApiPaging.asList<StockMovement>(cached.payload, StockMovement.fromJson),
           cached.lastUpdated,
         );
       }
@@ -80,9 +80,11 @@ class InventoryRepository {
     required double quantity,
     required String reason,
   }) async {
+    final intQty = quantity.round();
     await _api.post('/stock/adjustments', body: {
       'product_id': productId,
-      'quantity': quantity,
+      'quantity_change': intQty,
+      'quantity': intQty,
       'reason': reason.trim(),
     });
     // Invalidate caches so the next view reflects the adjustment.

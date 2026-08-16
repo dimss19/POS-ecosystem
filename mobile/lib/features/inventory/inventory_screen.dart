@@ -123,7 +123,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
                     itemCount: controller.visibleStock.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final product = controller.visibleStock[index];
                       return _StockCard(

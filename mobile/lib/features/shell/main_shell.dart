@@ -28,6 +28,7 @@ class _MainShellState extends State<MainShell> {
   ];
 
   Future<void> _signOut(BuildContext context) async {
+    final auth = context.read<AuthController>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -46,7 +47,7 @@ class _MainShellState extends State<MainShell> {
       ),
     );
     if (confirmed == true) {
-      await context.read<AuthController>().logout();
+      await auth.logout();
     }
   }
 

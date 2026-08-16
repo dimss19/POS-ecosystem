@@ -1,16 +1,17 @@
-/**
- * KASIR POS — Checkout Modal Component
- *
- * Handles checkout payment method selection, amount paid inputs, change calculation,
- * validation, and final transaction submission.
- */
-
 import { useState, useEffect, useRef } from 'react';
 import { useCartStore } from '../../stores/cartStore';
 import { useTransactionStore } from '../../stores/transactionStore';
 import { useAuthStore } from '../../stores/authStore';
+import { useShiftStore } from '../../stores/shiftStore';
 import { formatRupiah } from '../../utils/format';
 import { printReceipt } from '../../services/printer';
+import {
+  XIcon,
+  BanknoteIcon,
+  BuildingIcon,
+  SmartphoneIcon,
+  AlertTriangleIcon,
+} from '../icons';
 import type { PaymentMethod } from '../../types';
 
 interface CheckoutModalProps {
@@ -25,6 +26,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
   const { items, discount, getSubtotal, getTotal, clearCart } = useCartStore();
   const { createTransaction, isLoading, error } = useTransactionStore();
   const { user } = useAuthStore();
+  const { activeShift } = useShiftStore();
 
   const total = getTotal();
   const subtotal = getSubtotal();
@@ -84,13 +86,17 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
       return;
     }
 
+    if (!activeShift) {
+      setCheckoutError('Tidak ada shift aktif! Silakan buka shift terlebih dahulu.');
+      return;
+    }
+
     try {
       setCheckoutError(null);
       
-      // Shift ID check fallback to 1 until Part 7 is implemented
-      const shiftId = 1;
-      const cashierId = user?.id || 1;
-      const cashierName = user?.name || 'Kasir';
+      const shiftId = activeShift.id;
+      const cashierId = user?.id || activeShift.cashier_id || 1;
+      const cashierName = user?.name || activeShift.cashier_name || 'Kasir';
 
       const tx = await createTransaction({
         shiftId,
@@ -139,64 +145,73 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in">
       {/* Modal Container */}
-      <div className="w-full max-w-2xl bg-surface-900 border border-surface-700/50 rounded-2xl overflow-hidden shadow-modal animate-scale-in flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-2xl bg-surface-900 border border-surface-700/80 rounded-2xl overflow-hidden shadow-modal animate-scale-in flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-surface-700/50">
-          <h3 className="text-lg font-bold text-surface-100">Pembayaran Kasir</h3>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-surface-700/80 bg-surface-900">
+          <h3 className="text-base font-bold text-surface-100">Pembayaran Kasir</h3>
           <button
             type="button"
             onClick={onClose}
-            className="text-surface-400 hover:text-surface-200 transition-colors text-xl font-medium"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-surface-400 hover:text-surface-200 hover:bg-surface-800 transition-colors"
             disabled={isLoading}
           >
-            ✕
+            <XIcon size={18} />
           </button>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Total Display */}
-          <div className="bg-surface-950 rounded-xl p-4 flex justify-between items-center border border-surface-800">
-            <span className="text-sm font-semibold text-surface-400 uppercase tracking-wider">Total Tagihan</span>
-            <span className="text-3xl font-extrabold text-primary-400">{formatRupiah(total)}</span>
+          <div className="bg-surface-950 rounded-xl p-4 flex justify-between items-center border border-surface-700/80">
+            <span className="text-xs font-bold text-surface-400 uppercase tracking-wider">Total Tagihan</span>
+            <span className="text-3xl font-extrabold text-primary-600">{formatRupiah(total)}</span>
           </div>
 
           {/* Payment Method Selector */}
-          <div className="space-y-3">
-            <label className="block text-sm font-semibold text-surface-300">Metode Pembayaran</label>
+          <div className="space-y-2">
+            <label className="block text-xs font-bold text-surface-400 uppercase tracking-wider">Metode Pembayaran</label>
             <div className="grid grid-cols-3 gap-3">
-              {(['CASH', 'TRANSFER', 'QRIS'] as PaymentMethod[]).map((method) => (
-                <button
-                  key={method}
-                  type="button"
-                  onClick={() => setPaymentMethod(method)}
-                  className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-200 ${
-                    paymentMethod === method
-                      ? 'border-primary-500 bg-primary-600/10 text-primary-300'
-                      : 'border-surface-700 bg-surface-800 text-surface-400 hover:border-surface-600 hover:text-surface-200'
-                  }`}
-                >
-                  <span className="text-2xl mb-1">
-                    {method === 'CASH' ? '💵' : method === 'TRANSFER' ? '🏦' : '📱'}
-                  </span>
-                  <span className="text-sm font-bold">{method}</span>
-                </button>
-              ))}
+              {(['CASH', 'TRANSFER', 'QRIS'] as PaymentMethod[]).map((method) => {
+                const isSelected = paymentMethod === method;
+                return (
+                  <button
+                    key={method}
+                    type="button"
+                    onClick={() => setPaymentMethod(method)}
+                    className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all duration-150 ${
+                      isSelected
+                        ? 'border-primary-500 bg-primary-50 text-primary-700 font-bold shadow-xs'
+                        : 'border-surface-700/80 bg-surface-900 text-surface-400 hover:border-surface-600 hover:text-surface-200 shadow-2xs'
+                    }`}
+                  >
+                    <span className="mb-2">
+                      {method === 'CASH' ? (
+                        <BanknoteIcon size={24} />
+                      ) : method === 'TRANSFER' ? (
+                        <BuildingIcon size={24} />
+                      ) : (
+                        <SmartphoneIcon size={24} />
+                      )}
+                    </span>
+                    <span className="text-xs font-bold">{method}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           {/* Payment Input Details */}
           {paymentMethod === 'CASH' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Cash Input */}
-              <div className="space-y-3">
-                <label htmlFor="amount-paid-input" className="block text-sm font-semibold text-surface-300">
+              <div className="space-y-2">
+                <label htmlFor="amount-paid-input" className="block text-xs font-bold text-surface-400 uppercase tracking-wider">
                   Uang Diterima
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-surface-500">Rp</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-bold text-surface-400">Rp</span>
                   <input
                     ref={inputRef}
                     id="amount-paid-input"
@@ -204,37 +219,37 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
                     value={inputVal}
                     onChange={(e) => handleAmountChange(e.target.value)}
                     placeholder="0"
-                    className="w-full pl-12 pr-4 py-4 rounded-xl bg-surface-800 border-2 border-surface-700 text-2xl font-bold text-surface-100 outline-none focus:border-primary-500 transition-colors"
+                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-surface-900 border-2 border-surface-700/80 text-xl font-bold text-surface-100 outline-none focus:border-primary-500 transition-colors shadow-2xs"
                     disabled={isLoading}
                   />
                 </div>
               </div>
 
               {/* Change Calculation */}
-              <div className="space-y-3">
-                <span className="block text-sm font-semibold text-surface-300">Kembalian</span>
-                <div className={`w-full py-4 px-6 rounded-xl border-2 flex items-center justify-between ${
+              <div className="space-y-2">
+                <span className="block text-xs font-bold text-surface-400 uppercase tracking-wider">Kembalian</span>
+                <div className={`w-full py-3 px-4 rounded-xl border-2 flex items-center justify-between ${
                   isInsufficient 
-                    ? 'bg-danger-500/5 border-danger-500/20 text-danger-400' 
-                    : 'bg-success-500/5 border-success-500/20 text-success-400'
+                    ? 'bg-danger-50 border-danger-200 text-danger-700' 
+                    : 'bg-success-50 border-success-200 text-success-700'
                 }`}>
-                  <span className="text-sm font-medium">
-                    {isInsufficient ? 'Kurang Pembayaran' : 'Jumlah Kembalian'}
+                  <span className="text-xs font-semibold">
+                    {isInsufficient ? 'Kurang Bayar' : 'Kembalian'}
                   </span>
-                  <span className="text-2xl font-extrabold">
+                  <span className="text-xl font-extrabold">
                     {formatRupiah(isInsufficient ? total - amountPaid : change)}
                   </span>
                 </div>
               </div>
 
               {/* Quick Cash Option */}
-              <div className="md:col-span-2 space-y-3">
-                <span className="block text-sm font-semibold text-surface-400">Pilihan Uang Cepat</span>
+              <div className="md:col-span-2 space-y-2">
+                <span className="block text-xs font-bold text-surface-400 uppercase tracking-wider">Pilihan Uang Cepat</span>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => handleQuickCash(total)}
-                    className="px-4 py-2.5 rounded-lg bg-surface-800 border border-surface-700 text-xs font-bold text-surface-200 hover:border-primary-500 transition-all active:scale-95"
+                    className="px-3.5 py-2 rounded-lg bg-surface-900 border border-surface-700 text-xs font-bold text-surface-300 hover:border-primary-500 hover:text-primary-600 transition-all active:scale-95 shadow-2xs"
                   >
                     Uang Pas
                   </button>
@@ -243,7 +258,7 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
                       key={val}
                       type="button"
                       onClick={() => handleQuickCash(val)}
-                      className="px-4 py-2.5 rounded-lg bg-surface-800 border border-surface-700 text-xs font-bold text-surface-200 hover:border-primary-500 transition-all active:scale-95"
+                      className="px-3.5 py-2 rounded-lg bg-surface-900 border border-surface-700 text-xs font-bold text-surface-300 hover:border-primary-500 hover:text-primary-600 transition-all active:scale-95 shadow-2xs"
                     >
                       {formatRupiah(val)}
                     </button>
@@ -253,12 +268,12 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             </div>
           ) : (
             // Transfer/QRIS non-editable summary
-            <div className="bg-surface-800 rounded-xl p-4 border border-surface-700/50 space-y-2">
-              <p className="text-sm text-surface-400">
+            <div className="bg-surface-950 rounded-xl p-4 border border-surface-700/80 space-y-2">
+              <p className="text-xs text-surface-400">
                 Pilih metode non-tunai. Jumlah tagihan akan dicatat persis sebesar total pembayaran:
               </p>
               <div className="flex justify-between items-center py-2">
-                <span className="text-sm font-semibold text-surface-200">Uang Diterima</span>
+                <span className="text-sm font-semibold text-surface-300">Uang Diterima</span>
                 <span className="text-lg font-bold text-surface-100">{formatRupiah(total)}</span>
               </div>
             </div>
@@ -266,18 +281,19 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
 
           {/* Validation & Store Errors */}
           {(checkoutError || error) && (
-            <div className="px-4 py-3 rounded-lg bg-danger-500/10 border border-danger-500/30 text-danger-400 text-sm animate-fade-in">
-              {checkoutError || error}
+            <div className="px-4 py-3 rounded-xl bg-danger-50 border border-danger-200 text-danger-700 text-xs font-semibold animate-fade-in flex items-center gap-2">
+              <AlertTriangleIcon size={16} className="text-danger-600 shrink-0" />
+              <span>{checkoutError || error}</span>
             </div>
           )}
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-surface-700/50 flex gap-3 bg-surface-950">
+        <div className="px-6 py-4 border-t border-surface-700/80 flex gap-3 bg-surface-950">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-3 px-4 rounded-xl bg-surface-800 border border-surface-700 text-surface-300 font-semibold hover:bg-surface-700 transition-colors"
+            className="flex-1 py-3 px-4 rounded-xl bg-surface-900 border border-surface-700 text-surface-300 font-semibold hover:bg-surface-800 transition-colors text-sm shadow-2xs"
             disabled={isLoading}
           >
             Batal
@@ -287,9 +303,9 @@ export default function CheckoutModal({ isOpen, onClose, onSuccess }: CheckoutMo
             type="button"
             onClick={handleCheckoutSubmit}
             disabled={isLoading || isInsufficient}
-            className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-success-500 to-success-600 text-white font-bold hover:from-success-400 hover:to-success-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg active:scale-[0.98]"
+            className="flex-1 py-3 px-4 rounded-xl bg-success-600 text-white font-bold hover:bg-success-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 shadow-md active:scale-[0.98] text-sm"
           >
-            {isLoading ? 'Memproses...' : 'Konfirmasi Pembayaran'}
+            {isLoading ? 'Memproses Transaksi...' : 'Konfirmasi Pembayaran'}
           </button>
         </div>
       </div>

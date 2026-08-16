@@ -72,7 +72,7 @@ class _StockMovementsScreenState extends State<StockMovementsScreen> {
                                 padding: const EdgeInsets.all(16),
                                 itemCount:
                                     (state.data ?? const <StockMovement>[]).length,
-                                separatorBuilder: (_, __) =>
+                                separatorBuilder: (_, _) =>
                                     const SizedBox(height: 10),
                                 itemBuilder: (context, index) {
                                   final movement =
